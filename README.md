@@ -27,6 +27,7 @@ npm run build
 npm run start
 npm run lint
 npm run deploy:pages
+npm run dev:pages
 ```
 
 ## Déploiement Cloudflare Pages
@@ -53,6 +54,39 @@ npm run deploy:pages
 ```
 
 Dossier publié : `out/`
+
+## Formulaire de contact (email réel via Resend)
+
+Le formulaire envoie désormais vers `/api/contact` (Cloudflare Pages Function) et déclenche un email réel.
+
+Variables à configurer :
+
+- `RESEND_API_KEY`
+- `RESEND_FROM_EMAIL` (ex: `contact@njrsolutions.fr`, domaine validé dans Resend)
+- `CONTACT_TO_EMAIL` (ex: `naimragot06@gmail.com`)
+
+### Local (test fonction API)
+
+1. Créez un fichier `.dev.vars` à partir de `.dev.vars.example`
+2. Lancez :
+
+```bash
+npm run dev:pages
+```
+
+### Cloudflare Pages (production)
+
+Cloudflare Dashboard → `Workers & Pages` → projet → `Settings` → `Variables and Secrets` :
+
+- Ajouter `RESEND_API_KEY` (secret)
+- Ajouter `RESEND_FROM_EMAIL`
+- Ajouter `CONTACT_TO_EMAIL`
+
+Puis redéployer :
+
+```bash
+npm run deploy:pages
+```
 
 ## Structure
 

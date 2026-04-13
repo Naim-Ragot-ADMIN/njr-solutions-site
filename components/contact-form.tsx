@@ -55,6 +55,7 @@ export function ContactForm({
     setHasSubmitted(true);
     setTouched({
       name: true,
+      email: true,
       phone: true,
       message: true,
       consent: true,
@@ -73,19 +74,51 @@ export function ContactForm({
     setIsSubmitting(true);
     setFeedback(null);
 
-    await new Promise((resolve) => {
-      window.setTimeout(resolve, 900);
-    });
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: values.name.trim(),
+          email: values.email.trim(),
+          phone: values.phone.trim(),
+          message: values.message.trim(),
+        }),
+      });
 
-    setValues(initialContactFormValues);
-    setTouched({});
-    setHasSubmitted(false);
-    setIsSubmitting(false);
-    setFeedback({
-      type: "success",
-      title: "Votre message est prêt à être traité",
-      message: `Merci. ${business.name} revient vers vous rapidement. ${responsePromise}.`,
-    });
+      const payload = (await response.json()) as
+        | { ok?: boolean; error?: string; message?: string }
+        | undefined;
+
+      if (!response.ok || !payload?.ok) {
+        throw new Error(payload?.error ?? "Échec de l'envoi du message.");
+      }
+
+      setValues(initialContactFormValues);
+      setTouched({});
+      setHasSubmitted(false);
+      setFeedback({
+        type: "success",
+        title: "Message envoyé",
+        message: `Merci. ${business.name} revient vers vous rapidement. ${responsePromise}.`,
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Impossible d'envoyer le message pour le moment.";
+
+      setFeedback({
+        type: "error",
+        title: "Envoi impossible",
+        message:
+          `${message} Vous pouvez aussi nous appeler directement au ${business.phone}.`,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -114,6 +147,17 @@ export function ContactForm({
           error={getFieldError("name")}
           autoComplete="name"
           placeholder="Prénom et nom"
+        />
+        <Field
+          label="Email"
+          name="email"
+          type="email"
+          value={values.email}
+          onChange={(value) => updateField("email", value)}
+          onBlur={() => markTouched("email")}
+          error={getFieldError("email")}
+          autoComplete="email"
+          placeholder="Votre adresse email"
         />
         <Field
           label="Téléphone"

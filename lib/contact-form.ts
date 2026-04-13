@@ -1,5 +1,6 @@
 export type ContactFormValues = {
   name: string;
+  email: string;
   phone: string;
   message: string;
   consent: boolean;
@@ -11,12 +12,14 @@ export type ContactFormErrors = Partial<
 
 export const initialContactFormValues: ContactFormValues = {
   name: "",
+  email: "",
   phone: "",
   message: "",
   consent: false,
 };
 
 const phoneRegex = /^[0-9+\s().-]{8,}$/;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function validateContactForm(
   values: ContactFormValues,
@@ -25,6 +28,12 @@ export function validateContactForm(
 
   if (!values.name.trim()) {
     errors.name = "Veuillez renseigner votre nom.";
+  }
+
+  if (!values.email.trim()) {
+    errors.email = "Veuillez renseigner votre email.";
+  } else if (!emailRegex.test(values.email.trim())) {
+    errors.email = "L'adresse email semble invalide.";
   }
 
   if (!values.phone.trim()) {
